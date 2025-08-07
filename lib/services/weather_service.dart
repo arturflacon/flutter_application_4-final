@@ -2,23 +2,26 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class WeatherService {
-  final String apiKey = "90d660709219d96c95761cf3baaee750";
-  final String city = "Terra Rica, PR";
-  final String country = "BR";
+  static const String _apiKey = "90d660709219d96c95761cf3baaee750";
+  static const String _baseUrl =
+      "https://api.openweathermap.org/data/2.5/weather";
 
-  Future<String> getWeatherForDate(DateTime date) async {
-    final url = Uri.parse(
-        "https://api.openweathermap.org/data/2.5/weather?q=$city&appid=$apiKey&lang=pt_br&units=metric");
+  Future<Map<String, dynamic>> getWeather(String city) async {
+    final url =
+        Uri.parse("$_baseUrl?q=$city&appid=$_apiKey&units=metric&lang=pt_br");
 
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final desc = data['weather'][0]['description'];
-      final temp = data['main']['temp'];
-      return "$desc, ${temp.toStringAsFixed(0)}°C";
+      final data = json.decode(response.body);
+
+      return {
+        "temp": data["main"]["temp"].toString(),
+        "description": data["weather"][0]["description"],
+        "icon": data["weather"][0]["icon"]
+      };
     } else {
-      return "Não disponível";
+      throw Exception("Erro ao buscar dados do clima");
     }
   }
 }
